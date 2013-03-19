@@ -26,10 +26,11 @@
 #define tPAYLOADLEN     32   //240 //byte
 */
 
-#define T1TURNS         60
-#define T1PR            0xFFFF //==> packet send interval: T1TURNS * (T1PR+1)
-                               //e.g.: 60*(65535+1) = 3932160, that's 0.32s between each packet @ 12.288MHz external clock intput.
+#define T1TURNS         64
+#define T1PR            61436  //==> packet send interval: T1TURNS * T1PR
+                               //e.g.: 60*(65535) = 3932100, that's 0.32s between each packet @ 12.288MHz external clock intput.
                                //With a buffer length of e.g 512 at the receiver the measuring time window is 163,84s long (=2,75 minutes)
+
 
 BOOL txDone;
 unsigned int T1Overflow = 0;
@@ -51,6 +52,7 @@ int main(void) {
     unsigned char bb_inDat;
     unsigned char MCRByte;
     unsigned char dummyDat;
+    int timestampIncrement;
 
     txDone = FALSE;
 
@@ -123,7 +125,7 @@ int main(void) {
     */
 
     
-
+    timestampIncrement = (T1TURNS*T1PR) / (12288000/48000); //64 x 61436 / 256 = 3931904 / 256 = 15359
     txDone = FALSE;
     while(1){
         //bOk = bOk && ADF_MMapRead(MCR_interrupt_source_0_Adr, 0x01, &MCRByte);
@@ -137,7 +139,7 @@ int main(void) {
             mPORTBToggleBits(BIT_2); //debugging
 
             /*write timestamp to packet ram-------------*/
-            tsData_32++;
+            tsData_32 += timestampIncrement;
             tsData_8[0] = tsData_32;
             tsData_8[1] = tsData_32 >> 8;
             tsData_8[2] = tsData_32 >> 16;
