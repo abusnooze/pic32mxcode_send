@@ -15,23 +15,34 @@
 #include "configandmux.h"
 #include "timestamping.h"
 #include "switching.h"
+#include "vcxo.h"
 #include "_TxModuleMain.h"
 
 
-#define T1TURNS         64
-#define T1PR            61436  //==> packet send interval: T1TURNS * T1PR
-                               //e.g.: 60*(65535) = 3932100, that's 0.32s between each packet @ 12.288MHz external clock intput.
-                               //With a buffer length of e.g 512 at the receiver the measuring time window is 163,84s long (=2,75 minutes)
 
 
 BOOL txDone;
 unsigned int T1Overflow = 0;
 
+
+BOOL writeData2PacketRam(UINT32 dat)
+{
+    UINT8 tsData_8[PKT_MAX_PKT_LEN];
+    BOOL bOk;
+
+    tsData_8[0] = dat;
+    tsData_8[1] = dat >> 8;
+    tsData_8[2] = dat >> 16;
+    tsData_8[3] = dat >> 24;
+    bOk = ADF_MMapWrite(PKT_RAM_BASE_PTR, PKT_MAX_PKT_LEN, tsData_8);
+
+    return bOk;
+}
+
 int main(void) {
 
     BOOL bOk = TRUE;
     TyMCR MCRregisters;
-    UINT8 tsData_8[PKT_MAX_PKT_LEN];
     UINT32 tsData_32;
 
     unsigned char dummyDat;
@@ -39,42 +50,28 @@ int main(void) {
 
     txDone = FALSE;
 
+    /*---SYSTEM CONFIG---*/
     SYSTEMConfig(GetSystemClock(), SYS_CFG_WAIT_STATES | SYS_CFG_PCACHE);
     DDPCONbits.JTAGEN = 0; //disable JTAG
-
-    /*configure phase 1*/
-    SwitchOffSport();
-    pinMux01();
-    mPORTCClearBits(BIT_0); //set CLK_alt low (start off with low clock)
-    SPI1_configMaster();
-    SwitchADFSpi2Spi1();
-
-
-    /*set up ADF7023*/
-    bOk = bOk && ADF_Init();
-    bOk = bOk && ADF_MCRRegisterReadBack(&MCRregisters); //read back the MCRRegisters
-
-
-
-    /*Configure Counter*/
     INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
-    PORTSetPinsDigitalIn(IOPORT_A, BIT_4);      //T1CK
-    OpenTimer1(T1_ON | T1_SOURCE_EXT | T1_PS_1_1, T1PR); //no prescalor other than 1_1 work's?!
-    ConfigIntTimer1(T1_INT_ON | T1_INT_PRIOR_1);
-    
-   
+
+    /*---PINMUXING (SWITCHING)---------------------------------------*/
+    SwitchOffSport(); //remove with new HW
+    pinMux01();
+    SwitchADFSpi2Spi1(); //remove with new HW
+
+    /*---SETUP-------------------------------------------------------*/
+    setupEdgeCount();
+    setupADF();
+    ADF_MCRRegisterReadBack(&MCRregisters); //read back the MCRRegisters
+
+    /*---ENABLE INTERRUPTS------------------------------------------*/
     INTEnableInterrupts();
 
-    /*WRITE test timestamp to packet ram-----------------------*/
+    
+    /*---LOOP-------------------------------------------------------*/
     tsData_32 = 1;
-    tsData_8[0] = tsData_32;
-    tsData_8[1] = tsData_32 >> 8;
-    tsData_8[2] = tsData_32 >> 16;
-    tsData_8[3] = tsData_32 >> 24;
-    bOk = bOk && ADF_MMapWrite(PKT_RAM_BASE_PTR, PKT_MAX_PKT_LEN, tsData_8);
-    /*---------------------------------------------------------*/
-
-    /*ADF: Go to RX state*/
+    writeData2PacketRam(tsData_32);
     bOk = bOk && ADF_GoToTxState();
 
     timestampIncrement = (T1TURNS*T1PR) / (12288000/48000); //64 x 61436 / 256 = 3931904 / 256 = 15359
@@ -82,28 +79,15 @@ int main(void) {
     while(1){
 
         if (txDone){
-
             mPORTBToggleBits(BIT_2); //debugging
-
-            /*write timestamp to packet ram-------------*/
             tsData_32 += timestampIncrement;
-            tsData_8[0] = tsData_32;
-            tsData_8[1] = tsData_32 >> 8;
-            tsData_8[2] = tsData_32 >> 16;
-            tsData_8[3] = tsData_32 >> 24;
-            bOk = bOk && ADF_MMapWrite(PKT_RAM_BASE_PTR, PKT_MAX_PKT_LEN, tsData_8);
-            /*------------------------------------------*/
-
+            writeData2PacketRam(tsData_32);
             txDone = FALSE;
             dummyDat = 0xFF;
             bOk = bOk && ADF_MMapWrite(MCR_interrupt_source_0_Adr, 0x1, &dummyDat); //clear all interrupts in source 0 by writing 1's
-            if(bOk == FALSE){
-                bOk = TRUE;
-            }
-
-            bOk = bOk && ADF_GoToTxState();
-  
+            bOk = bOk && ADF_GoToTxState(); 
         }
+        
     }
 
 

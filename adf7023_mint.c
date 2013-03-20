@@ -35,6 +35,15 @@
 ADFSTA_Reg            ADF7023Status;
 TyBBRAM               BBRAM;
 
+
+
+int setupADF()
+{
+    SPI1_configMaster();
+    ADF_Init();
+    return 0;
+}
+
 /*
  alternative implementation of ADF_FirstConnect()
  */
