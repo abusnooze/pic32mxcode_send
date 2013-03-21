@@ -832,7 +832,7 @@ void ADF_BBRAMDefault(TyBBRAM *pBBRAM)
                                       //packet_length_control_packet_len_variable   | // Variable packet length
                                       packet_length_control_packet_len_fixed      | // Fixed packet length
                                       //packet_length_control_crc_en_yes            | // CRC Enabled
-                                      packet_length_control_crc_en_no             | // CRC Disabled
+                                      packet_length_control_crc_en_yes             | // CRC enabled
                                       packet_length_control_data_mode_packet      | // No sport
                                       //packet_length_control_data_mode_sport_sync  | // SPORT mode
                                       packet_length_control_length_offset_minus0;   // For variable length packets where the first byte (length) needs to be adjusted
