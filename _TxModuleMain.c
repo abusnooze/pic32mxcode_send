@@ -44,9 +44,10 @@ int main(void) {
     BOOL bOk = TRUE;
     TyMCR MCRregisters;
     UINT32 tsData_32;
+    int i;
 
     unsigned char dummyDat;
-    int timestampIncrement;
+    UINT32 timestampIncrement;
 
     txDone = FALSE;
 
@@ -72,9 +73,12 @@ int main(void) {
     /*---LOOP-------------------------------------------------------*/
     tsData_32 = 1;
     writeData2PacketRam(tsData_32);
+    i = 50000;
+    while(i--);
     bOk = bOk && ADF_GoToTxState();
 
-    timestampIncrement = (T1TURNS*T1PR) / (12288000/48000); //64 x 61436 / 256 = 3931904 / 256 = 15359
+    timestampIncrement = (UINT32)((T1TURNS*T1PR) / (12288000/48000)); //64 x 61436 / 256 = 3931904 / 256 = 15359
+    //timestampIncrement = 1;
     txDone = FALSE;
     while(1){
 
@@ -82,6 +86,8 @@ int main(void) {
             mPORTBToggleBits(BIT_2); //debugging
             tsData_32 += timestampIncrement;
             writeData2PacketRam(tsData_32);
+            i = 50000;
+            while(i--);
             txDone = FALSE;
             dummyDat = 0xFF;
             bOk = bOk && ADF_MMapWrite(MCR_interrupt_source_0_Adr, 0x1, &dummyDat); //clear all interrupts in source 0 by writing 1's
