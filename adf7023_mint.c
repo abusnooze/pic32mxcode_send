@@ -586,6 +586,39 @@ BOOL ADF_GoToRxState(void)
    return bOk;
 }
 
+
+BOOL ADF_PrepareTx(void)
+{
+   BOOL  RetVal = TRUE;
+   int      iTmp;
+   int      i = 0x0;
+   
+   RetVal = RetVal && ADF_WaitCmdLdr();
+   if(RetVal){        
+        ADF_CSN_DEASSERT; // De-assert SPI chip select 
+        ADF_CSN_ASSERT; // Assert SPI chip select
+        // Wait for MISO line to go high
+        // Wait for ADF to wake up (only necessary for first byte in packet)
+        iTmp = 0; // clear before following line
+        // monitor MISO line (P1.5)
+        while (0 == iTmp && i < 1000) { //check whether bit 5 is high
+            iTmp = ADF_MISO_IN; // bits 7:0 are current POrt1 data input
+            i++;
+        }
+        if (1000 == i){
+            RetVal = FALSE;
+        }
+        
+   }
+        return RetVal;
+}
+
+void ADF_GoToTxStateNow(void)
+{
+    ADF_XMit(CMD_PHY_TX,NULL); // Send Command
+    ADF_CSN_DEASSERT;   // De-assert SPI chip select
+}
+
 /*************************************************************************/
 /* void ADF_GoToRxState(void)                    */
 /* Parameters:          */

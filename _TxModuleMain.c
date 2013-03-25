@@ -62,24 +62,28 @@ int main(void) {
     SwitchADFSpi2Spi1(); //remove with new HW
 
     /*---SETUP-------------------------------------------------------*/
-    setupEdgeCount();
     setupADF();
     ADF_MCRRegisterReadBack(&MCRregisters); //read back the MCRRegisters
+    //setupEdgeCount();
 
     /*---ENABLE INTERRUPTS------------------------------------------*/
-    INTEnableInterrupts();
+    //INTEnableInterrupts();
 
     
     /*---LOOP-------------------------------------------------------*/
     tsData_32 = 1;
     writeData2PacketRam(tsData_32);
-    i = 50000;
-    while(i--);
-    bOk = bOk && ADF_GoToTxState();
+    //i = 50000;
+    //while(i--);
+    //bOk = bOk && ADF_GoToTxState();
 
     timestampIncrement = (UINT32)((T1TURNS*T1PR) / (12288000/48000)); //64 x 61436 / 256 = 3931904 / 256 = 15359
     //timestampIncrement = 1;
     txDone = FALSE;
+    bOk = bOk && ADF_PrepareTx();
+
+    setupEdgeCount();
+    INTEnableInterrupts(); //enable interrupts
     while(1){
 
         if (txDone){
@@ -88,10 +92,11 @@ int main(void) {
             writeData2PacketRam(tsData_32);
             i = 50000;
             while(i--);
-            txDone = FALSE;
             dummyDat = 0xFF;
             bOk = bOk && ADF_MMapWrite(MCR_interrupt_source_0_Adr, 0x1, &dummyDat); //clear all interrupts in source 0 by writing 1's
-            bOk = bOk && ADF_GoToTxState(); 
+            bOk = bOk && ADF_PrepareTx();
+            txDone = FALSE;
+            //bOk = bOk && ADF_GoToTxState();
         }
         
     }
@@ -104,6 +109,7 @@ void __ISR(_TIMER_1_VECTOR, ipl1) T1Interrupt()
 {
    T1Overflow++;
    if (T1Overflow == T1TURNS){
+       ADF_GoToTxStateNow();
        T1Overflow = 0;
        txDone = TRUE;
    }

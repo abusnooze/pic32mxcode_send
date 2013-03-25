@@ -687,6 +687,8 @@ BOOL        ADF_waitForMISOToGoHigh();
 BOOL        ADF_MCRRegisterReadBack(TyMCR *pMCRin);
 BOOL        ADF_GoToRxState(void);
 BOOL        ADF_GoToTxState(void);
+BOOL        ADF_PrepareTx(void);
+void        ADF_GoToTxStateNow(void);
 void        ADF_XMit_softwareSPI(unsigned char ucByte,unsigned char *pData);
 
 ///////////////////////////////////////////////////////////////////////////////
