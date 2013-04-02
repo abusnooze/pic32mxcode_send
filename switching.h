@@ -1,4 +1,4 @@
-/* 
+/*
  * File:   switching.h
  * Author: p2773
  *
@@ -13,10 +13,18 @@ extern "C" {
 #endif
 
 
-void SwitchADFSpi2Spi1();
-void SwitchADFSpi2SpiAlt();
-void SwitchOnSport();
+#define     turnOnLED1          (mPORTCSetBits(BIT_5))
+#define     turnOffLED1         (mPORTCClearBits(BIT_5))
+#define     toggleLED1          (mPORTCToggleBits(BIT_5))
+#define     turnOnLED2          (mPORTASetBits(BIT_9))
+#define     turnOffLED2         (mPORTAClearBits(BIT_9))
+#define     toggleLED2          (mPORTAToggleBits(BIT_9))
 
+#define     switchOnCounter     (mPORTAClearBits(BIT_1))
+#define     switchOffCounter    (mPORTASetBits(BIT_1))
+
+void switch2ClockBuffer();
+void switch2ClockAnd();
 
 #ifdef	__cplusplus
 }

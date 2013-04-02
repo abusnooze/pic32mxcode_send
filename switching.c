@@ -6,22 +6,15 @@
 #include "switching.h"
 
 
-void SwitchADFSpi2Spi1()
+void switch2ClockBuffer()
 {
-    mPORTBSetBits(BIT_9);
+    mPORTBClearBits(BIT_13); //disable AND
+    mPORTBSetBits(BIT_6); //enable buffer
 }
 
-void SwitchADFSpi2SpiAlt()
+void switch2ClockAnd()
 {
-     mPORTBClearBits(BIT_9);
-}
+    mPORTBClearBits(BIT_6); //disable BUFFER
+    mPORTBSetBits(BIT_13); //enable AND
 
-void SwitchOnSport()
-{
-    mPORTCClearBits(BIT_5);
-}
-
-void SwitchOffSport()
-{
-    mPORTCSetBits(BIT_5);
 }

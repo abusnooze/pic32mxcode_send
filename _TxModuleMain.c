@@ -44,6 +44,7 @@ int main(void) {
     BOOL bOk = TRUE;
     TyMCR MCRregisters;
     UINT32 tsData_32;
+    unsigned int pbclockfreq;
     int i;
 
     unsigned char dummyDat;
@@ -52,17 +53,26 @@ int main(void) {
     txDone = FALSE;
 
     /*---SYSTEM CONFIG---*/
-    SYSTEMConfig(GetSystemClock(), SYS_CFG_WAIT_STATES | SYS_CFG_PCACHE);
+    pbclockfreq = SYSTEMConfig(GetSystemClock(), SYS_CFG_WAIT_STATES | SYS_CFG_PCACHE);
     DDPCONbits.JTAGEN = 0; //disable JTAG
     INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
 
     /*---PINMUXING (SWITCHING)---------------------------------------*/
-    SwitchOffSport(); //remove with new HW
     pinMux01();
-    SwitchADFSpi2Spi1(); //remove with new HW
+
+    /*---SWITCHING---------------------------------------------------*/
+    turnOffLED1;
+    turnOffLED2;
+    switchOnCounter; //enable clock division
+    switch2ClockAnd(); //use AND Gatter instead of clock buffer
+    //switch2ClockBuffer();
 
     /*---SETUP-------------------------------------------------------*/
+    turnOnLED1;
+    turnOnLED2;
+    setupPWM(pbclockfreq);
     setupADF();
+    turnOffLED1;
     ADF_MCRRegisterReadBack(&MCRregisters); //read back the MCRRegisters
     //setupEdgeCount();
 
@@ -82,12 +92,13 @@ int main(void) {
     txDone = FALSE;
     bOk = bOk && ADF_PrepareTx();
 
+    turnOffLED2;
     setupEdgeCount();
     INTEnableInterrupts(); //enable interrupts
     while(1){
 
         if (txDone){
-            mPORTBToggleBits(BIT_2); //debugging
+            toggleLED1; //debugging
             tsData_32 += timestampIncrement;
             writeData2PacketRam(tsData_32);
             i = 50000;

@@ -50,6 +50,8 @@ int setupADF()
 BOOL ADF_Init(void)
 {
     BOOL bOk = TRUE;
+
+    ADF_CSN_DEASSERT;
     ADF_FwState   FwState = ADF_GetFwState();
     bOk   = ADF_IssueCommandNW(CMD_HW_RESET);
    /*datasheet pg 35: Init after issuing CMD_HW_RESET:
@@ -65,10 +67,10 @@ BOOL ADF_Init(void)
     *
     * The ADF7023 is now configured in the PHY_OFF state.
    */
-   int j = 500000;
+   int j = 5000000;
    while(j--); //wait...
 
-   ADF_CSN_DEASSERT;
+   //ADF_CSN_DEASSERT;
    ADF_CSN_ASSERT;
    bOk = bOk && ADF_waitForMISOToGoHigh();
    //ADF_CSN_DEASSERT; // bring CS high again?
