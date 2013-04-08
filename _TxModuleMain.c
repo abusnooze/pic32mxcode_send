@@ -58,21 +58,23 @@ int main(void) {
     INTConfigureSystem(INT_SYSTEM_CONFIG_MULT_VECTOR);
 
     /*---PINMUXING (SWITCHING)---------------------------------------*/
+    mPORTCSetBits(BIT_5); // = SwitchOffSport();
     pinMux01();
+    mPORTBSetBits(BIT_9); // = SwitchADFSpi2Spi1();
 
     /*---SWITCHING---------------------------------------------------*/
-    turnOffLED1;
-    turnOffLED2;
-    switchOnCounter; //enable clock division
-    switch2ClockAnd(); //use AND Gatter instead of clock buffer
+    //turnOffLED1;
+    //turnOffLED2;
+    //switchOnCounter; //enable clock division
+    //switch2ClockAnd(); //use AND Gatter instead of clock buffer
     //switch2ClockBuffer();
 
     /*---SETUP-------------------------------------------------------*/
-    turnOnLED1;
-    turnOnLED2;
+    //turnOnLED1;
+    //turnOnLED2;
     //setupPWM(pbclockfreq);
     setupADF();
-    turnOffLED1;
+    //turnOffLED1;
     ADF_MCRRegisterReadBack(&MCRregisters); //read back the MCRRegisters
     //setupEdgeCount();
 
@@ -92,13 +94,14 @@ int main(void) {
     txDone = FALSE;
     bOk = bOk && ADF_PrepareTx();
 
-    turnOffLED2;
+    //turnOffLED2;
     setupEdgeCount();
     INTEnableInterrupts(); //enable interrupts
     while(1){
 
         if (txDone){
-            toggleLED1; //debugging
+            //toggleLED1; //debugging
+            mPORTBToggleBits(BIT_2); //debugging
             tsData_32 += timestampIncrement;
             writeData2PacketRam(tsData_32);
             i = 50000;
