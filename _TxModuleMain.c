@@ -70,7 +70,7 @@ int main(void) {
     /*---SETUP-------------------------------------------------------*/
     turnOnLED1;
     turnOnLED2;
-    setupPWM(pbclockfreq);
+    //setupPWM(pbclockfreq);
     setupADF();
     turnOffLED1;
     ADF_MCRRegisterReadBack(&MCRregisters); //read back the MCRRegisters
@@ -116,6 +116,7 @@ int main(void) {
     return (EXIT_SUCCESS);
 }
 
+/*
 void __ISR(_TIMER_1_VECTOR, ipl1) T1Interrupt()
 {
    T1Overflow++;
@@ -126,4 +127,12 @@ void __ISR(_TIMER_1_VECTOR, ipl1) T1Interrupt()
    }
    mT1ClearIntFlag();
 
+}*/
+
+void __ISR(_TIMER_5_VECTOR, ipl6) T5Interrupt()
+{
+   ADF_GoToTxStateNow();
+   T1Overflow = 0;
+   txDone = TRUE;
+   mT5ClearIntFlag();
 }

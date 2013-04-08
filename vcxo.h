@@ -16,6 +16,7 @@ extern "C" {
 #define T1PR            61436  //==> packet send interval: T1TURNS * T1PR
                                //e.g.: 60*(65535) = 3932100, that's 0.32s between each packet @ 12.288MHz external clock intput.
                                //With a buffer length of e.g 512 at the receiver the measuring time window is 163,84s long (=2,75 minutes)
+#define T45PR           3931904
     
 int setupEdgeCount(void);
 
