@@ -83,12 +83,9 @@ int main(void) {
     /*---LOOP-------------------------------------------------------*/
     tsData_32 = 1;
     writeData2PacketRam(tsData_32);
-    //i = 50000;
-    //while(i--);
-    //bOk = bOk && ADF_GoToTxState();
 
-    timestampIncrement = (UINT32)((T1TURNS*T1PR) / (12288000/48000)); //64 x 61436 / 256 = 3931904 / 256 = 15359
-    //timestampIncrement = 1;
+
+    timestampIncrement = (UINT32)(REFEDGES / 256); //256 = (12288000/48000)
     txDone = FALSE;
     bOk = bOk && ADF_PrepareTx();
 
