@@ -12,6 +12,7 @@
       <itemPath>interrupts.h</itemPath>
       <itemPath>_TxModuleMain.h</itemPath>
       <itemPath>vcxo.h</itemPath>
+      <itemPath>smbus.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LibraryFiles"
                    displayName="Library Files"
@@ -36,6 +37,7 @@
       <itemPath>interrupts.c</itemPath>
       <itemPath>_TxModuleMain.c</itemPath>
       <itemPath>vcxo.c</itemPath>
+      <itemPath>smbus.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

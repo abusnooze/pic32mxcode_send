@@ -24,6 +24,9 @@
 BOOL txDone;
 unsigned int T1Overflow = 0;
 
+volatile unsigned char sendData = 0; //for SMBus
+volatile unsigned char recvData = 0; //for SMBus
+volatile unsigned char smbusCmdReceived = 0; //for SMBus
 
 BOOL writeData2PacketRam(UINT32 dat)
 {
@@ -68,6 +71,7 @@ int main(void) {
     //switch2ClockBuffer();
 
     /*---SETUP-------------------------------------------------------*/
+    setupSMBus(pbclockfreq);              //I2C (SMBus slave)
     turnOnLED1;
     turnOnLED2;
     //setupPWM(pbclockfreq);
